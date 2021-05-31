@@ -7,7 +7,6 @@
 
 #import <Foundation/Foundation.h>
 #import <VisionCamera/FrameProcessorPlugin.h>
-#import <Vision/VNDetectBarcodesRequest.h>
 
 // Example for an Objective-C Frame Processor plugin
 
@@ -15,6 +14,17 @@
 @end
 
 @implementation QRCodeFrameProcessorPluginObjC
+
++ (MLKFaceDetectorOptions*)options {
+  static MLKFaceDetectorOptions* options;
+  if (options == nil) {
+    options = [[MLKFaceDetectorOptions alloc] init];
+    options.performanceMode = MLKFaceDetectorPerformanceModeAccurate;
+    options.landmarkMode = MLKFaceDetectorLandmarkModeAll;
+    options.classificationMode = MLKFaceDetectorClassificationModeAll;
+  }
+  return options;
+}
 
 static inline id exampleObjC___scanQRCodes(CMSampleBufferRef buffer, NSArray* arguments) {
   // TODO: Use some AI to detect QR codes in the CMSampleBufferRef
