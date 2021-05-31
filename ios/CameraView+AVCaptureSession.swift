@@ -111,9 +111,9 @@ extension CameraView {
     videoOutput!.setSampleBufferDelegate(self, queue: videoQueue)
     videoOutput!.alwaysDiscardsLateVideoFrames = true
     captureSession.addOutput(videoOutput!)
-    if videoDeviceInput!.device.position == .front {
+    /*if videoDeviceInput!.device.position == .front {
       videoOutput!.mirror()
-    }
+    }*/
 
     // Audio Output
     if let audioOutput = self.audioOutput {

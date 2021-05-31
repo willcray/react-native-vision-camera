@@ -14,7 +14,7 @@ import {
 } from 'react-native-vision-camera';
 import { Camera, frameRateIncluded } from 'react-native-vision-camera';
 import { useIsScreenFocussed } from './hooks/useIsScreenFocused';
-import { CONTENT_SPACING, MAX_ZOOM_FACTOR, SAFE_AREA_PADDING } from './Constants';
+import { CONTENT_SPACING, MAX_ZOOM_FACTOR, SAFE_AREA_PADDING, SCREEN_HEIGHT, SCREEN_WIDTH } from './Constants';
 import Reanimated, {
   Extrapolate,
   interpolate,
@@ -221,10 +221,10 @@ export const CameraPage: NavigationFunctionComponent = ({ componentId }) => {
       position: 'absolute',
       borderWidth: 1,
       borderColor: 'red',
-      left: withSpring(x / PIXEL_RATIO),
-      top: withSpring(y / PIXEL_RATIO),
-      width: withSpring(width / PIXEL_RATIO),
-      height: withSpring(height / PIXEL_RATIO),
+      left: withSpring(y * SCREEN_HEIGHT - 100),
+      top: withSpring(x * SCREEN_WIDTH + 150),
+      width: withSpring(width * SCREEN_WIDTH + 100),
+      height: withSpring((height * SCREEN_HEIGHT) / 2),
     };
   }, [faceFrame]);
 
@@ -248,14 +248,25 @@ export const CameraPage: NavigationFunctionComponent = ({ componentId }) => {
                 enableZoomGesture={false}
                 animatedProps={cameraAnimatedProps}
                 frameProcessor={frameProcessor}
-                frameProcessorFps={1}
+                frameProcessorFps={30}
               />
             </TapGestureHandler>
           </Reanimated.View>
         </PinchGestureHandler>
       )}
 
+      {/* <View
+        style={{
+          position: 'absolute',
+          left: 0,
+          right: 0,
+          width: `${((format?.videoHeight ?? 0) / SCREEN_WIDTH) * 100}%`,
+          height: `${((format?.videoWidth ?? 0) / SCREEN_HEIGHT) * 100}%`,
+          borderWidth: 1,
+          borderColor: 'green',
+        }}> */}
       <Reanimated.View style={frameStyle} />
+      {/* </View> */}
 
       <CaptureButton
         style={styles.captureButton}

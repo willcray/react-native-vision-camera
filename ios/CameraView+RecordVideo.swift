@@ -139,7 +139,9 @@ extension CameraView: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAud
       let secondsPerFrame = 1.0 / frameProcessorFps.doubleValue
       let nanosecondsPerFrame = secondsPerFrame * 1_000_000_000.0
       if diff > UInt64(nanosecondsPerFrame) {
+        let start = CACurrentMediaTime()
         frameProcessor(sampleBuffer)
+        ReactLogger.log(level: .trace, message: "Frame Processor execution took \(CACurrentMediaTime() - start)ms!")
         lastFrameProcessorCall = DispatchTime.now()
       }
     }

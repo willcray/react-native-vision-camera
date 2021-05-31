@@ -55,6 +55,9 @@ export const sortFormats = (left: CameraDeviceFormat, right: CameraDeviceFormat)
   leftPoints -= Math.abs(leftAspectRatioDiff) * 50;
   rightPoints -= Math.abs(rightAspectRatioDiff) * 50;
 
+  leftPoints -= Math.round((left.videoHeight ?? 0) / 1000);
+  rightPoints -= Math.round((right.videoWidth ?? 0) / 1000);
+
   return rightPoints - leftPoints;
 };
 
