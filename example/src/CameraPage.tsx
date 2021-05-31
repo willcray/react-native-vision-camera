@@ -1,13 +1,29 @@
 import * as React from 'react';
 import { useRef, useState, useMemo, useCallback } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import { Dimensions, PixelRatio, StyleSheet, Text, View } from 'react-native';
 import { PinchGestureHandler, PinchGestureHandlerGestureEvent, TapGestureHandler } from 'react-native-gesture-handler';
 import { Navigation, NavigationFunctionComponent } from 'react-native-navigation';
-import { CameraDeviceFormat, CameraRuntimeError, PhotoFile, sortFormats, useCameraDevices, VideoFile } from 'react-native-vision-camera';
+import {
+  CameraDeviceFormat,
+  CameraRuntimeError,
+  PhotoFile,
+  sortFormats,
+  useCameraDevices,
+  useFrameProcessor,
+  VideoFile,
+} from 'react-native-vision-camera';
 import { Camera, frameRateIncluded } from 'react-native-vision-camera';
 import { useIsScreenFocussed } from './hooks/useIsScreenFocused';
 import { CONTENT_SPACING, MAX_ZOOM_FACTOR, SAFE_AREA_PADDING } from './Constants';
-import Reanimated, { Extrapolate, interpolate, useAnimatedGestureHandler, useAnimatedProps, useSharedValue } from 'react-native-reanimated';
+import Reanimated, {
+  Extrapolate,
+  interpolate,
+  useAnimatedGestureHandler,
+  useAnimatedProps,
+  useAnimatedStyle,
+  useSharedValue,
+  withSpring,
+} from 'react-native-reanimated';
 import { useEffect } from 'react';
 import { useIsForeground } from './hooks/useIsForeground';
 import { StatusBarBlurBackground } from './views/StatusBarBlurBackground';
@@ -15,6 +31,7 @@ import { CaptureButton } from './views/CaptureButton';
 import { PressableOpacity } from 'react-native-pressable-opacity';
 import MaterialIcon from 'react-native-vector-icons/MaterialCommunityIcons';
 import IonIcon from 'react-native-vector-icons/Ionicons';
+import { scanQRCodesObjC } from './frame-processors/ScanQRCode';
 
 const ReanimatedCamera = Reanimated.createAnimatedComponent(Camera);
 Reanimated.addWhitelistedNativeProps({
@@ -23,6 +40,9 @@ Reanimated.addWhitelistedNativeProps({
 
 const SCALE_FULL_ZOOM = 3;
 const BUTTON_SIZE = 40;
+const PIXEL_RATIO = PixelRatio.get();
+type Frame = { x: number; y: number; width: number; height: number };
+const ZERO: Frame = { x: 0, y: 0, width: 0, height: 0 };
 
 export const CameraPage: NavigationFunctionComponent = ({ componentId }) => {
   const camera = useRef<Camera>(null);
@@ -184,11 +204,29 @@ export const CameraPage: NavigationFunctionComponent = ({ componentId }) => {
     console.log('re-rendering camera page without active camera');
   }
 
-  // const frameProcessor = useFrameProcessor((frame) => {
-  //   'worklet';
-  //   const codes = scanQRCodesObjC(frame);
-  //   _log(`Codes: ${JSON.stringify(codes)}`);
-  // }, []);
+  const faceFrame = useSharedValue<Frame | undefined>(undefined);
+  const frameProcessor = useFrameProcessor(
+    (frame) => {
+      'worklet';
+      const faces = scanQRCodesObjC(frame);
+      _log(`Faces: ${JSON.stringify(faces)}`);
+      faceFrame.value = faces[0];
+    },
+    [faceFrame],
+  );
+
+  const frameStyle = useAnimatedStyle(() => {
+    const { x, y, height, width } = faceFrame.value ?? ZERO;
+    return {
+      position: 'absolute',
+      borderWidth: 1,
+      borderColor: 'red',
+      left: withSpring(x / PIXEL_RATIO),
+      top: withSpring(y / PIXEL_RATIO),
+      width: withSpring(width / PIXEL_RATIO),
+      height: withSpring(height / PIXEL_RATIO),
+    };
+  }, [faceFrame]);
 
   return (
     <View style={styles.container}>
@@ -209,13 +247,15 @@ export const CameraPage: NavigationFunctionComponent = ({ componentId }) => {
                 onError={onError}
                 enableZoomGesture={false}
                 animatedProps={cameraAnimatedProps}
-                // frameProcessor={frameProcessor}
-                // frameProcessorFps={1}
+                frameProcessor={frameProcessor}
+                frameProcessorFps={1}
               />
             </TapGestureHandler>
           </Reanimated.View>
         </PinchGestureHandler>
       )}
+
+      <Reanimated.View style={frameStyle} />
 
       <CaptureButton
         style={styles.captureButton}

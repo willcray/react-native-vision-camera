@@ -30,7 +30,7 @@
 
 static inline id exampleObjC___scanQRCodes(CMSampleBufferRef buffer, NSArray* arguments) {
   MLKVisionImage *image = [[MLKVisionImage alloc] initWithBuffer:buffer];
-  image.orientation = UIImageOrientationUp;
+  image.orientation = UIImageOrientationRightMirrored;
   NSArray<MLKFace*>* faces = [[QRCodeFrameProcessorPluginObjC faceDetector] resultsInImage:image error:nil];
   
   NSMutableArray* results = [[NSMutableArray alloc] initWithCapacity:faces.count];
