@@ -204,6 +204,18 @@ extension CameraView: AVCaptureVideoDataOutputSampleBufferDelegate, AVCaptureAud
     }
 
     // TODO: resize using VideoToolbox (VTPixelTransferSession)
+    let toWidth = 720
+    let toHeight = 480
+    
+    if let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) {
+      let image = CIImage(cvPixelBuffer: imageBuffer)
+      let transformed = image.transformed(by: CGAffineTransform(scaleX: 0.5, y: 0.5))
+      let context = CIContext()
+      let newBuffer: CVPixelBuffer?
+      // TODO: The args can't be 0 and nil
+      CVPixelBufferCreate(nil, 720, 480, 0, nil, &newBuffer)
+      context.render(transformed, to: newBuffer)
+    }
 
     if let frameProcessor = frameProcessorCallback,
        captureOutput is AVCaptureVideoDataOutput {
