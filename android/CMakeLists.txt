@@ -21,6 +21,8 @@ add_library(
         src/main/cpp/JImageProxy.cpp
         src/main/cpp/JImageProxyHostObject.cpp
         src/main/cpp/JHashMap.cpp
+        src/main/cpp/JPlaneProxy.cpp
+        ../cpp/jsi/TypedArray.cpp
 )
 
 # includes
@@ -49,6 +51,7 @@ target_include_directories(
         "${NODE_MODULES_DIR}/react-native-reanimated/Common/cpp/headers/Registries"
         "${NODE_MODULES_DIR}/react-native-reanimated/Common/cpp/hidden_headers"
         "src/main/cpp"
+        "../cpp"
 )
 
 # find libraries
